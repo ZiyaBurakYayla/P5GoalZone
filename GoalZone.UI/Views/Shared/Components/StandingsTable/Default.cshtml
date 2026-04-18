@@ -1,0 +1,66 @@
+@using GoalZone.UI.Models.Components
+@model List<StandingViewModel>
+<div class="gz-card">
+    <div class="gz-card-header">
+        <i class="fas fa-trophy text-warning me-2"></i> PUAN DURUMU
+    </div>
+    <div class="table-responsive">
+        <table class="gz-table standings-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Takım</th>
+                    <th>O</th>
+                    <th>G</th>
+                    <th>B</th>
+                    <th>M</th>
+                    <th>AG</th>
+                    <th>YG</th>
+                    <th>AV</th>
+                    <th>Son 5</th>
+                    <th style="text-align:center">P</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var team in Model)
+                {
+                    <tr class="@(team.Rank <= 4 ? "zone-cl" : team.Rank <= 6 ? "zone-uel" : team.Rank >= 18 ? "zone-rel" : "")">
+                        <td class="rank-cell">@team.Rank</td>
+                        <td class="team-cell">
+                            <div class="team-info">
+                                @if (!string.IsNullOrEmpty(team.LogoUrl))
+                                {
+                                    <img src="@team.LogoUrl" alt="@team.ShortCode" class="team-logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'" />
+                                    <span class="logo-fallback team-logo" style="display:none">@team.ShortCode.Substring(0, 1)</span>
+                                }
+                                else
+                                {
+                                    <span class="logo-fallback team-logo">@team.ShortCode.Substring(0, 1)</span>
+                                }
+                                <span class="team-name">@team.TeamName</span>
+                            </div>
+                        </td>
+                        <td>@team.Played</td>
+                        <td class="text-success fw-bold">@team.Won</td>
+                        <td>@team.Drawn</td>
+                        <td class="text-danger">@team.Lost</td>
+                        <td>@team.GoalsFor</td>
+                        <td>@team.GoalsAgainst</td>
+                        <td class="@(team.GoalDifference > 0 ? "text-success" : team.GoalDifference < 0 ? "text-danger" : "")">
+                            @(team.GoalDifference > 0 ? "+" : "")@team.GoalDifference
+                        </td>
+                        <td>
+                            <div class="last5">
+                                @foreach (var r in team.Last5)
+                                {
+                                    <span class="form-badge form-@r.ToLower()">@r</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="points-cell">@team.Points</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

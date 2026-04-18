@@ -1,0 +1,123 @@
+﻿@using GoalZone.UI.Models.Pages
+@model HomePageViewModel
+@{
+    ViewData["Title"] = "Ana Sayfa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="gz-page-header">
+    <div class="container">
+        <div class="week-hero">
+            <div class="week-hero-label">
+                <i class="fas fa-trophy text-warning me-2"></i> PREMIER LEAGUE
+            </div>
+            <div class="page-header-top">
+                <h1 class="week-hero-title">Hafta Sonuçları</h1>
+                @if (Model.AllSeasons.Count > 1)
+                {
+                    <div class="season-switcher">
+                        @foreach (var s in Model.AllSeasons)
+                        {
+                            <a asp-controller="Home" asp-action="Index"
+                               asp-route-seasonId="@s.Id"
+                               class="season-tab @(s.Id == Model.ActiveSeason?.Id ? "active" : "")">
+                                @s.Name
+                                @if (s.IsActive)
+                                {
+                                    <span class="season-active-dot"></span>
+                                }
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="week-hero-meta">
+                @if (Model.ActiveSeason != null)
+                {
+                    <span>@Model.ActiveSeason.Name Sezonu</span>
+                    <span class="bullet">·</span>
+                }
+                <span>@(Model.LiveMatches.Count + Model.RecentMatches.Count + Model.UpcomingMatches.Count) Maç</span>
+            </div>
+            <div class="week-hero-stats">
+                <div class="hero-stat"><span class="hero-stat-num text-danger">@Model.LiveMatches.Count</span><span>CANLI</span></div>
+                <div class="hero-stat"><span class="hero-stat-num text-success">@Model.RecentMatches.Count</span><span>BİTEN</span></div>
+                <div class="hero-stat"><span class="hero-stat-num text-info">@Model.UpcomingMatches.Count</span><span>YAKLAŞAN</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container gz-container">
+    @if (Model.FeaturedMatch != null)
+    {
+        <div class="featured-match-banner mb-4">
+            <div class="featured-badge"><i class="fas fa-star me-1"></i> FEATURED MATCH</div>
+            <a asp-controller="Matches" asp-action="Detail" asp-route-id="@Model.FeaturedMatch.Id" class="featured-match-inner">
+                <div class="featured-team featured-home">
+                    @if (!string.IsNullOrEmpty(Model.FeaturedMatch.HomeTeamLogo))
+                    {
+                        <img src="@Model.FeaturedMatch.HomeTeamLogo" alt="@Model.FeaturedMatch.HomeTeamShort" class="team-logo-lg mb-2" loading="lazy" onerror="this.style.display='none'" />
+                    }
+                    <div class="featured-team-code">@Model.FeaturedMatch.HomeTeamShort</div>
+                    <div class="featured-team-name">@Model.FeaturedMatch.HomeTeam</div>
+                    <div class="featured-role">EV SAHİBİ</div>
+                </div>
+                <div class="featured-center">
+                    <div class="featured-score">@Model.FeaturedMatch.HomeScoreFT-@Model.FeaturedMatch.AwayScoreFT</div>
+                    <div class="featured-status">MAÇ BİTTİ</div>
+                    @if (!string.IsNullOrEmpty(Model.FeaturedMatch.Venue))
+                    {
+                        <div class="featured-venue"><i class="fas fa-map-marker-alt me-1"></i>@Model.FeaturedMatch.Venue</div>
+                    }
+                </div>
+                <div class="featured-team featured-away">
+                    @if (!string.IsNullOrEmpty(Model.FeaturedMatch.AwayTeamLogo))
+                    {
+                        <img src="@Model.FeaturedMatch.AwayTeamLogo" alt="@Model.FeaturedMatch.AwayTeamShort" class="team-logo-lg mb-2" loading="lazy" onerror="this.style.display='none'" />
+                    }
+                    <div class="featured-team-code">@Model.FeaturedMatch.AwayTeamShort</div>
+                    <div class="featured-team-name">@Model.FeaturedMatch.AwayTeam</div>
+                    <div class="featured-role">DEPLASMAN</div>
+                </div>
+            </a>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            @await Component.InvokeAsync("LiveScoreboard")
+            @await Component.InvokeAsync("RecentMatches", new { seasonId = Model.ActiveSeason?.Id })
+
+            @if (Model.UpcomingMatches.Any())
+            {
+                <div class="gz-card mt-4">
+                    <div class="gz-card-header">
+                        <i class="fas fa-clock text-info me-2"></i> YAKLAŞAN MAÇLAR
+                    </div>
+                    <div class="upcoming-list">
+                        @foreach (var m in Model.UpcomingMatches)
+                        {
+                            <div class="upcoming-row">
+                                <div class="upcoming-time">@m.MatchDate.ToString("dd MMM HH:mm")</div>
+                                <div class="upcoming-teams">
+                                    <span>@m.HomeTeam</span>
+                                    <span class="upcoming-vs">VS</span>
+                                    <span>@m.AwayTeam</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(m.Venue))
+                                {
+                                    <div class="upcoming-venue"><i class="fas fa-map-marker-alt me-1"></i>@m.Venue</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            @await Component.InvokeAsync("StandingsTable", new { seasonId = Model.ActiveSeason?.Id })
+        </div>
+    </div>
+</div>

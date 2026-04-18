@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GoalZone Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="~/css/goalzone.css" rel="stylesheet" />
+    <link href="~/css/admin.css" rel="stylesheet" />
+</head>
+<body class="admin-body">
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-brand">
+                <div class="gz-brand-icon">⚽</div>
+                <div>
+                    <span class="brand-text">Goal<strong>Zone</strong></span>
+                    <span class="brand-sub">Admin Panel</span>
+                </div>
+            </div>
+
+            <nav class="admin-nav">
+                <div class="admin-nav-section">GENEL</div>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+
+                <div class="admin-nav-section">MAÇLAR</div>
+                <a asp-area="Admin" asp-controller="Matches" asp-action="Index"
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Matches" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    <i class="fas fa-list"></i> Tüm Maçlar
+                </a>
+                <a asp-area="Admin" asp-controller="Matches" asp-action="Create"
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Matches" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
+                    <i class="fas fa-plus-circle"></i> Yeni Maç Ekle
+                </a>
+
+                <div class="admin-nav-section">SİSTEM</div>
+                <a asp-area="Admin" asp-controller="Seasons" asp-action="Index"
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Seasons" ? "active" : "")">
+                    <i class="fas fa-calendar-alt"></i> Sezon Yönetimi
+                </a>
+                <a asp-area="Admin" asp-controller="Teams" asp-action="Index"
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Teams" ? "active" : "")">
+                    <i class="fas fa-shield-alt"></i> Takım Yönetimi
+                </a>
+
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Logout" class="admin-nav-item text-danger-soft">
+                    <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <i class="fas fa-circle text-success" style="font-size:.5rem"></i> API Bağlantısı Aktif
+            </div>
+        </aside>
+
+        <div class="admin-content">
+            <header class="admin-topbar">
+                <div class="admin-topbar-title">@ViewData["Title"]</div>
+                <div class="admin-topbar-right">
+                    <span class="admin-badge" id="activeSeasonBadge">Premier League</span>
+                </div>
+            </header>
+            <main class="admin-main">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/goalzone.js"></script>
+    <script>
+        fetch('/api/seasons/active')
+            .then(r => r.ok ? r.json() : null)
+            .then(s => { if (s) document.getElementById('activeSeasonBadge').textContent = 'Premier League ' + s.name; })
+            .catch(() => {});
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

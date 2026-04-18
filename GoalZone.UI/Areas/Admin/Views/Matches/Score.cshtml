@@ -1,0 +1,82 @@
+@using GoalZone.UI.Models.Components
+@model MatchDetailViewModel
+@{
+    ViewData["Title"] = "Skor Güncelle";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="match-admin-header mb-4">
+    <div class="match-admin-teams">
+        @if (!string.IsNullOrEmpty(Model.HomeTeamLogo))
+        {
+            <img src="@Model.HomeTeamLogo" alt="@Model.HomeTeam" class="team-logo-md" loading="lazy" onerror="this.style.display='none'" />
+        }
+        <span class="match-admin-team">@Model.HomeTeam</span>
+        <span class="match-admin-vs">vs</span>
+        <span class="match-admin-team">@Model.AwayTeam</span>
+        @if (!string.IsNullOrEmpty(Model.AwayTeamLogo))
+        {
+            <img src="@Model.AwayTeamLogo" alt="@Model.AwayTeam" class="team-logo-md" loading="lazy" onerror="this.style.display='none'" />
+        }
+    </div>
+    <div class="match-admin-meta">
+        Hafta @Model.WeekNumber · @Model.MatchDate.ToString("dd MMMM yyyy HH:mm")
+        @if (!string.IsNullOrEmpty(Model.Venue)) { <span>· @Model.Venue</span> }
+    </div>
+</div>
+
+<div class="admin-card" style="max-width:600px">
+    <div class="admin-card-header">
+        <span><i class="fas fa-pen me-2 text-info"></i>Skor ve Durum Güncelle</span>
+    </div>
+    <form asp-area="Admin" asp-controller="Matches" asp-action="Score"
+          asp-route-id="@Model.Id" method="post" class="admin-form">
+        <div class="score-input-grid">
+            <div class="score-col">
+                <div class="score-col-label">@Model.HomeTeam</div>
+                <div class="gz-label mt-2">İlk Yarı</div>
+                <input type="number" name="homeScoreHT" class="gz-input score-input"
+                       value="@Model.HomeScoreHT" min="0" placeholder="0" />
+                <div class="gz-label mt-2">Maç Sonu</div>
+                <input type="number" name="homeScoreFT" class="gz-input score-input"
+                       value="@Model.HomeScoreFT" min="0" placeholder="0" />
+            </div>
+            <div class="score-divider">—</div>
+            <div class="score-col">
+                <div class="score-col-label">@Model.AwayTeam</div>
+                <div class="gz-label mt-2">İlk Yarı</div>
+                <input type="number" name="awayScoreHT" class="gz-input score-input"
+                       value="@Model.AwayScoreHT" min="0" placeholder="0" />
+                <div class="gz-label mt-2">Maç Sonu</div>
+                <input type="number" name="awayScoreFT" class="gz-input score-input"
+                       value="@Model.AwayScoreFT" min="0" placeholder="0" />
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-6">
+                <label class="gz-label">Maç Durumu</label>
+                <select name="status" class="gz-select" required>
+                    <option value="NotPlayed" selected="@(Model.Status == "NotPlayed")">Oynanmadı</option>
+                    <option value="InProgress" selected="@(Model.Status == "InProgress")">Canlı (Devam Ediyor)</option>
+                    <option value="HalfTime" selected="@(Model.Status == "HalfTime")">Devre Arası</option>
+                    <option value="Finished" selected="@(Model.Status == "Finished")">Maç Bitti</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="gz-label">Canlı Dakika</label>
+                <input type="number" name="currentMinute" class="gz-input"
+                       value="@Model.CurrentMinute" min="1" max="120" placeholder="67" />
+            </div>
+        </div>
+
+        <div class="admin-form-footer">
+            <a asp-area="Admin" asp-controller="Matches" asp-action="Index" class="gz-btn gz-btn-ghost">
+                <i class="fas fa-arrow-left me-2"></i> Geri
+            </a>
+            <button type="submit" class="gz-btn gz-btn-primary">
+                <i class="fas fa-save me-2"></i> Güncelle
+            </button>
+        </div>
+    </form>
+</div>

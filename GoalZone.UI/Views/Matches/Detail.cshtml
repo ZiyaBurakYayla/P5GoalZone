@@ -1,0 +1,323 @@
+@model MatchDetailViewModel
+@using GoalZone.UI.Models.Components
+@using Microsoft.AspNetCore.Html
+@{
+    ViewData["Title"] = Model.HomeTeam + " vs " + Model.AwayTeam;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string GetStatusLabel(string status) => status switch
+    {
+        "Finished" => "MAÇ BİTTİ",
+        "InProgress" => "CANLI",
+        "HalfTime" => "DEVRE ARASI",
+        _ => "OYNANMADI"
+    };
+}
+
+<div class="match-detail-hero">
+    <div class="container">
+        <div class="match-meta-badges">
+            <span class="meta-badge">
+                <i class="fas fa-trophy me-1"></i> PREMIER LEAGUE — HAFTA @Model.WeekNumber
+            </span>
+            @if (Model.Status == "Finished")
+            {
+                <span class="meta-badge">MAÇ SONA ERDİ</span>
+            }
+            @if (Model.Status == "InProgress")
+            {
+                <span class="meta-badge live-meta">CANLI @Model.CurrentMinute'</span>
+            }
+            @if (Model.Attendance.HasValue)
+            {
+                <span class="meta-badge">
+                    <i class="fas fa-users me-1"></i>@Model.Attendance.Value.ToString("N0") SEYİRCİ
+                </span>
+            }
+        </div>
+
+        <div class="match-hero-scoreboard">
+            <div class="hero-team hero-home">
+                @if (!string.IsNullOrEmpty(Model.HomeTeamLogo))
+                {
+                    <img src="@Model.HomeTeamLogo" alt="@Model.HomeTeam" class="team-logo-xl mb-2" loading="lazy" onerror="this.style.display='none'" />
+                }
+                <div class="hero-team-code">@Model.HomeTeam.Split(' ').FirstOrDefault()</div>
+                <div class="hero-team-full">@Model.HomeTeam</div>
+                <div class="hero-role">EV SAHİBİ</div>
+            </div>
+
+            <div class="hero-center">
+                <div class="hero-score">
+                    @if (Model.HomeScoreFT.HasValue)
+                    {
+                        @Model.HomeScoreFT
+                        <text>-</text>
+
+                        @Model.AwayScoreFT
+                    }
+                    else
+                    {
+                        <text>vs</text>
+                    }
+                </div>
+                @if (Model.HomeScoreHT.HasValue)
+                {
+                    <div class="hero-ht">İY: @Model.HomeScoreHT-@Model.AwayScoreHT</div>
+                }
+                <div class="hero-status-label">@GetStatusLabel(Model.Status)</div>
+                <div class="hero-detail-row">
+                    @if (!string.IsNullOrEmpty(Model.Venue))
+                    {
+                        <span><i class="fas fa-map-marker-alt me-1"></i>@Model.Venue</span>
+                    }
+                    <span><i class="fas fa-calendar me-1"></i>@Model.MatchDate.ToString("dd MMMM yyyy")</span>
+                    @if (!string.IsNullOrEmpty(Model.RefereeName))
+                    {
+                        <span><i class="fas fa-whistle me-1"></i>@Model.RefereeName</span>
+                    }
+                </div>
+            </div>
+
+            <div class="hero-team hero-away">
+                @if (!string.IsNullOrEmpty(Model.AwayTeamLogo))
+                {
+                    <img src="@Model.AwayTeamLogo" alt="@Model.AwayTeam" class="team-logo-xl mb-2" loading="lazy" onerror="this.style.display='none'" />
+                }
+                <div class="hero-team-code">@Model.AwayTeam.Split(' ').FirstOrDefault()</div>
+                <div class="hero-team-full">@Model.AwayTeam</div>
+                <div class="hero-role">DEPLASMAN</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container gz-container">
+    <a asp-controller="Matches" asp-action="Index" class="back-btn mb-4 d-inline-flex">
+        <i class="fas fa-arrow-left me-2"></i> Maç Listesine Dön
+    </a>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="gz-card">
+                <div class="gz-card-header">
+                    <i class="fas fa-bolt text-warning me-2"></i> MAÇ OLAYLARI
+                </div>
+                <div class="events-timeline">
+                    @if (!Model.Events.Any())
+                    {
+                        <div class="empty-state">Henüz olay girilmemiş.</div>
+                    }
+                    @foreach (var ev in Model.Events.OrderBy(e => e.Minute))
+                    {
+                        <div class="event-row @(ev.IsHomeTeam ? "event-home" : "event-away")">
+                            @if (ev.IsHomeTeam)
+                            {
+                                <div class="event-player-info">
+                                    <span class="event-player">@ev.PlayerName</span>
+                                    @if (!string.IsNullOrEmpty(ev.Description))
+                                    {
+                                        <span class="event-desc">@ev.Description</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(ev.SubstitutedPlayerName))
+                                    {
+                                        <span class="event-sub-name">&#8595; @ev.SubstitutedPlayerName</span>
+                                    }
+                                </div>
+                                <div class="event-icon-wrap">
+                                    @switch (ev.EventType)
+                                    {
+                                        case "Goal":
+                                            <span class="ev-icon-badge ev-goal-badge" title="Gol">
+                                                <i class="fas fa-futbol"></i>
+                                            </span>
+                                            break;
+                                        case "YellowCard":
+                                            <span class="ev-icon-badge ev-yellow-badge" title="Sarı Kart"></span>
+                                            break;
+                                        case "RedCard":
+                                            <span class="ev-icon-badge ev-red-badge" title="Kırmızı Kart"></span>
+                                            break;
+                                        case "YellowRedCard":
+                                            <span class="ev-icon-badge ev-yr-badge" title="2. Sarı / Kırmızı">
+                                                <span class="ev-y"></span><span class="ev-r"></span>
+                                            </span>
+                                            break;
+                                        case "Substitution":
+                                            <span class="ev-icon-badge ev-sub-badge" title="Değişiklik">
+                                                <i class="fas fa-arrow-up ev-in"></i>
+                                                <i class="fas fa-arrow-down ev-out"></i>
+                                            </span>
+                                            break;
+                                        default:
+                                            <span class="ev-icon-badge ev-goal-badge">
+                                                <i class="fas fa-circle"></i>
+                                            </span>
+                                            break;
+                                    }
+                                </div>
+                                <div class="event-minute">@ev.Minute'</div>
+                                <div class="event-spacer"></div>
+                            }
+                            else
+                            {
+                                <div class="event-spacer"></div>
+                                <div class="event-minute">@ev.Minute'</div>
+                                <div class="event-icon-wrap">
+                                    @switch (ev.EventType)
+                                    {
+                                        case "Goal":
+                                            <span class="ev-icon-badge ev-goal-badge" title="Gol">
+                                                <i class="fas fa-futbol"></i>
+                                            </span>
+                                            break;
+                                        case "YellowCard":
+                                            <span class="ev-icon-badge ev-yellow-badge" title="Sarı Kart"></span>
+                                            break;
+                                        case "RedCard":
+                                            <span class="ev-icon-badge ev-red-badge" title="Kırmızı Kart"></span>
+                                            break;
+                                        case "YellowRedCard":
+                                            <span class="ev-icon-badge ev-yr-badge" title="2. Sarı / Kırmızı">
+                                                <span class="ev-y"></span><span class="ev-r"></span>
+                                            </span>
+                                            break;
+                                        case "Substitution":
+                                            <span class="ev-icon-badge ev-sub-badge" title="Değişiklik">
+                                                <i class="fas fa-arrow-up ev-in"></i>
+                                                <i class="fas fa-arrow-down ev-out"></i>
+                                            </span>
+                                            break;
+                                        default:
+                                            <span class="ev-icon-badge ev-goal-badge">
+                                                <i class="fas fa-circle"></i>
+                                            </span>
+                                            break;
+                                    }
+                                </div>
+                                <div class="event-player-info text-end">
+                                    <span class="event-player">@ev.PlayerName</span>
+                                    @if (!string.IsNullOrEmpty(ev.Description))
+                                    {
+                                        <span class="event-desc">@ev.Description</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(ev.SubstitutedPlayerName))
+                                    {
+                                        <span class="event-sub-name">&#8595; @ev.SubstitutedPlayerName</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            @if (Model.Statistics != null)
+            {
+                var s = Model.Statistics;
+                <div class="gz-card">
+                    <div class="gz-card-header">
+                        <i class="fas fa-chart-bar text-info me-2"></i> MAÇ ÖZETİ
+                    </div>
+
+                    <div class="stat-team-header">
+                        <div class="stat-team-side">
+                            @if (!string.IsNullOrEmpty(Model.HomeTeamLogo))
+                            {
+                                <img src="@Model.HomeTeamLogo" alt="@Model.HomeTeam" class="team-logo-sm" loading="lazy" onerror="this.style.display='none'" />
+                            }
+                            <span>@Model.HomeTeam</span>
+                        </div>
+                        <div class="stat-team-side text-end">
+                            <span>@Model.AwayTeam</span>
+                            @if (!string.IsNullOrEmpty(Model.AwayTeamLogo))
+                            {
+                                <img src="@Model.AwayTeamLogo" alt="@Model.AwayTeam" class="team-logo-sm" loading="lazy" onerror="this.style.display='none'" />
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(s.HalfTimeScore))
+                    {
+                        <div class="stat-summary-row">
+                            <div class="stat-summary-block">
+                                <div class="ss-label">İLK YARI</div>
+                                <div class="ss-val">@s.HalfTimeScore</div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(s.SecondHalfScore))
+                            {
+                                <div class="stat-summary-block">
+                                    <div class="ss-label">İKİNCİ YARI</div>
+                                    <div class="ss-val">@s.SecondHalfScore</div>
+                                </div>
+                            }
+                            <div class="stat-summary-block">
+                                <div class="ss-label">SONUÇ</div>
+                                <div class="ss-val text-success">@Model.HomeScoreFT-@Model.AwayScoreFT</div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="stats-list">
+
+                        @{
+                            void RenderStatBar(string label, string? homeVal, string? awayVal, double? home, double? away)
+                            {
+                                if (home == null && away == null) return;
+                                double total = (home ?? 0) + (away ?? 0);
+                                double homePct = total > 0 ? (home ?? 0) / total * 100 : 50;
+                                int hp = (int)Math.Round(homePct);
+                                int ap = 100 - hp;
+                                <div class="stat-row">
+                                    <span class="stat-val-home">@(homeVal ?? "-")</span>
+                                    <div class="stat-center">
+                                        <div class="stat-label">@label</div>
+                                        <div class="stat-bar">
+                                            <div class="stat-bar-home" style="width:@(hp)%"></div>
+                                            <div class="stat-bar-away" style="width:@(ap)%"></div>
+                                        </div>
+                                    </div>
+                                    <span class="stat-val-away">@(awayVal ?? "-")</span>
+                                </div>
+                            }
+                        }
+
+                        @{
+                            RenderStatBar("TOPA SAHİP OLMA", s.HomePossession + "%", s.AwayPossession + "%", (double?)s.HomePossession, (double?)s.AwayPossession);
+                        }
+                        @{
+                            RenderStatBar("ŞUT", s.HomeTotalShots?.ToString(), s.AwayTotalShots?.ToString(), (double?)s.HomeTotalShots, (double?)s.AwayTotalShots);
+                        }
+                        @{
+                            RenderStatBar("İSABETLİ ŞUT", s.HomeShotsOnTarget?.ToString(), s.AwayShotsOnTarget?.ToString(), (double?)s.HomeShotsOnTarget, (double?)s.AwayShotsOnTarget);
+                        }
+                        @{
+                            RenderStatBar("PAS", s.HomePasses?.ToString(), s.AwayPasses?.ToString(), (double?)s.HomePasses, (double?)s.AwayPasses);
+                        }
+                        @{
+                            RenderStatBar("PAS İSABETİ", s.HomePassAccuracy + "%", s.AwayPassAccuracy + "%", (double?)s.HomePassAccuracy, (double?)s.AwayPassAccuracy);
+                        }
+                        @{
+                            RenderStatBar("KORNER", s.HomeCorners?.ToString(), s.AwayCorners?.ToString(), (double?)s.HomeCorners, (double?)s.AwayCorners);
+                        }
+                        @{
+                            RenderStatBar("FAUL", s.HomeFouls?.ToString(), s.AwayFouls?.ToString(), (double?)s.HomeFouls, (double?)s.AwayFouls);
+                        }
+                        @{
+                            RenderStatBar("OFSAYİT", s.HomeOffsides?.ToString(), s.AwayOffsides?.ToString(), (double?)s.HomeOffsides, (double?)s.AwayOffsides);
+                        }
+                        @{
+                            RenderStatBar("SARI KART", s.HomeYellowCards?.ToString(), s.AwayYellowCards?.ToString(), (double?)s.HomeYellowCards, (double?)s.AwayYellowCards);
+                        }
+                        @{
+                            RenderStatBar("KIRMIZI KART", s.HomeRedCards?.ToString(), s.AwayRedCards?.ToString(), (double?)s.HomeRedCards, (double?)s.AwayRedCards);
+                        }
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

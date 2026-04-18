@@ -1,0 +1,98 @@
+@using GoalZone.UI.Models.Components
+@using Microsoft.AspNetCore.Html
+@model MatchDetailViewModel
+@{
+    ViewData["Title"] = "Maç İstatistikleri";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var s = Model.Statistics;
+}
+
+<div class="match-admin-header mb-4">
+    <div class="match-admin-teams">
+        @if (!string.IsNullOrEmpty(Model.HomeTeamLogo))
+        {
+            <img src="@Model.HomeTeamLogo" alt="@Model.HomeTeam" class="team-logo-md" loading="lazy" onerror="this.style.display='none'" />
+        }
+        <span class="match-admin-team">@Model.HomeTeam</span>
+        <span class="match-admin-vs">vs</span>
+        <span class="match-admin-team">@Model.AwayTeam</span>
+        @if (!string.IsNullOrEmpty(Model.AwayTeamLogo))
+        {
+            <img src="@Model.AwayTeamLogo" alt="@Model.AwayTeam" class="team-logo-md" loading="lazy" onerror="this.style.display='none'" />
+        }
+    </div>
+</div>
+
+<div class="admin-card" style="max-width:700px">
+    <div class="admin-card-header">
+        <span><i class="fas fa-chart-bar me-2 text-info"></i>İstatistik Gir / Güncelle</span>
+    </div>
+    <form asp-area="Admin" asp-controller="Matches" asp-action="Statistics"
+          asp-route-id="@Model.Id" method="post" class="admin-form">
+
+        <div class="stat-input-section-title">Özet Skorlar</div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="gz-label">İlk Yarı Skoru</label>
+                <input type="text" name="halfTimeScore" class="gz-input"
+                       value="@s?.HalfTimeScore" placeholder="1-1" />
+            </div>
+            <div class="col-md-6">
+                <label class="gz-label">İkinci Yarı Skoru</label>
+                <input type="text" name="secondHalfScore" class="gz-input"
+                       value="@s?.SecondHalfScore" placeholder="1-1" />
+            </div>
+        </div>
+
+        <div class="stat-input-header">
+            <span></span>
+            <span class="stat-col-home">@Model.HomeTeam</span>
+            <span class="stat-col-away">@Model.AwayTeam</span>
+        </div>
+
+        @StatRow("Topa Sahip Olma (%)", "homePossession", "awayPossession",
+        s?.HomePossession?.ToString(), s?.AwayPossession?.ToString())
+        @StatRow("Toplam Şut", "homeTotalShots", "awayTotalShots",
+                s?.HomeTotalShots?.ToString(), s?.AwayTotalShots?.ToString())
+        @StatRow("İsabetli Şut", "homeShotsOnTarget", "awayShotsOnTarget",
+                s?.HomeShotsOnTarget?.ToString(), s?.AwayShotsOnTarget?.ToString())
+        @StatRow("Pas", "homePasses", "awayPasses",
+                s?.HomePasses?.ToString(), s?.AwayPasses?.ToString())
+        @StatRow("Pas İsabeti (%)", "homePassAccuracy", "awayPassAccuracy",
+                s?.HomePassAccuracy?.ToString(), s?.AwayPassAccuracy?.ToString())
+        @StatRow("Korner", "homeCorners", "awayCorners",
+                s?.HomeCorners?.ToString(), s?.AwayCorners?.ToString())
+        @StatRow("Faul", "homeFouls", "awayFouls",
+                s?.HomeFouls?.ToString(), s?.AwayFouls?.ToString())
+        @StatRow("Ofsayt", "homeOffsides", "awayOffsides",
+                s?.HomeOffsides?.ToString(), s?.AwayOffsides?.ToString())
+        @StatRow("Sarı Kart", "homeYellowCards", "awayYellowCards",
+                s?.HomeYellowCards?.ToString(), s?.AwayYellowCards?.ToString())
+        @StatRow("Kırmızı Kart", "homeRedCards", "awayRedCards",
+                s?.HomeRedCards?.ToString(), s?.AwayRedCards?.ToString())
+
+        <div class="admin-form-footer">
+            <a asp-area="Admin" asp-controller="Matches" asp-action="Events"
+               asp-route-id="@Model.Id" class="gz-btn gz-btn-ghost">
+                <i class="fas fa-arrow-left me-2"></i> Geri
+            </a>
+            <button type="submit" class="gz-btn gz-btn-primary">
+                <i class="fas fa-save me-2"></i> İstatistikleri Kaydet
+            </button>
+        </div>
+    </form>
+</div>
+
+@functions {
+    IHtmlContent StatRow(string label, string homeName, string awayName, string? homeVal, string? awayVal)
+    {
+        return new HtmlString($@"
+        <div class='stat-input-row'>
+            <span class='stat-input-label'>{label}</span>
+            <input type='number' name='{homeName}' class='gz-input stat-mini-input'
+                   value='{homeVal ?? ""}' min='0' step='0.01' placeholder='0' />
+            <input type='number' name='{awayName}' class='gz-input stat-mini-input'
+                   value='{awayVal ?? ""}' min='0' step='0.01' placeholder='0' />
+        </div>");
+    }
+}

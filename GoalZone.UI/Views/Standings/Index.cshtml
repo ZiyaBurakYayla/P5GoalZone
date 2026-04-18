@@ -1,0 +1,49 @@
+@using GoalZone.UI.Models.Pages
+@model StandingsPageViewModel
+@{
+    ViewData["Title"] = "Puan Durumu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="gz-page-header">
+    <div class="container">
+        <div class="page-header-inner">
+            <div class="page-header-badge">
+                <i class="fas fa-trophy text-warning me-2"></i> PREMIER LEAGUE
+            </div>
+            <div class="page-header-top">
+                <h1 class="page-title">Puan Durumu</h1>
+                @if (Model.AllSeasons.Count > 1)
+                {
+                    <div class="season-switcher">
+                        @foreach (var s in Model.AllSeasons)
+                        {
+                            <a asp-controller="Standings" asp-action="Index"
+                               asp-route-seasonId="@s.Id"
+                               class="season-tab @(s.Id == Model.SelectedSeasonId ? "active" : "")">
+                                @s.Name
+                                @if (s.IsActive)
+                                {
+                                    <span class="season-active-dot"></span>
+                                }
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+            @if (Model.ActiveSeason != null)
+            {
+                <p class="page-subtitle">@Model.ActiveSeason.Name Sezonu</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="container gz-container">
+    <div class="standings-legend mb-3">
+        <span class="legend-item legend-cl"><span class="legend-dot"></span> Şampiyonlar Ligi (1-4)</span>
+        <span class="legend-item legend-uel"><span class="legend-dot"></span> UEFA Avrupa Ligi (5-6)</span>
+        <span class="legend-item legend-rel"><span class="legend-dot"></span> Küme Düşme (18-20)</span>
+    </div>
+    @await Component.InvokeAsync("StandingsTable", new { seasonId = Model.SelectedSeasonId })
+</div>

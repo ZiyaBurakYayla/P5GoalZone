@@ -1,0 +1,196 @@
+@using GoalZone.UI.Models.Components
+@model List<MatchListViewModel>
+@{
+    ViewData["Title"] = "Tüm Maçlar";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var allSeasons   = ViewBag.AllSeasons as List<SeasonViewModel> ?? new();
+    var currentSeason = ViewBag.Season as SeasonViewModel;
+    var allTeams     = ViewBag.AllTeams as List<TeamViewModel> ?? new();
+    var filterTeam   = ViewBag.FilterTeam as string ?? "";
+    var filterStatus = ViewBag.FilterStatus as string ?? "";
+
+    var filtered = Model.AsEnumerable();
+    if (!string.IsNullOrEmpty(filterTeam))
+        filtered = filtered.Where(m => m.HomeTeam.Contains(filterTeam, StringComparison.OrdinalIgnoreCase)
+                                    || m.AwayTeam.Contains(filterTeam, StringComparison.OrdinalIgnoreCase));
+    if (!string.IsNullOrEmpty(filterStatus))
+        filtered = filtered.Where(m => m.Status == filterStatus);
+    var displayList = filtered.OrderBy(x => x.WeekNumber).ThenBy(x => x.MatchDate).ToList();
+}
+
+<div class="admin-toolbar mb-3">
+    <div class="admin-toolbar-left flex-wrap gap-2">
+        <span class="admin-count-badge">@displayList.Count / @Model.Count maç</span>
+        @if (allSeasons.Count > 1)
+        {
+            @foreach (var s in allSeasons)
+            {
+                <a asp-area="Admin" asp-controller="Matches" asp-action="Index"
+                   asp-route-seasonId="@s.Id"
+                   class="season-tab-admin @(s.Id == currentSeason?.Id ? "active" : "")">
+                    @s.Name
+                    @if (s.IsActive) { <span class="season-active-dot"></span> }
+                </a>
+            }
+        }
+        else if (currentSeason != null)
+        {
+            <span class="admin-season-badge">@currentSeason.Name</span>
+        }
+    </div>
+    <a asp-area="Admin" asp-controller="Matches" asp-action="Create" class="gz-btn gz-btn-primary">
+        <i class="fas fa-plus me-2"></i> Yeni Maç Ekle
+    </a>
+</div>
+
+<div class="admin-filter-bar mb-3">
+    <div class="admin-filter-group">
+        <label class="admin-filter-label"><i class="fas fa-search me-1"></i>Takım</label>
+        <select id="filterTeamSelect" class="gz-select gz-select-sm" onchange="applyFilters()">
+            <option value="">Tüm Takımlar</option>
+            @foreach (var t in allTeams.OrderBy(t => t.Name))
+            {
+                <option value="@t.Name" selected="@(filterTeam == t.Name)">@t.Name</option>
+            }
+        </select>
+    </div>
+    <div class="admin-filter-group">
+        <label class="admin-filter-label"><i class="fas fa-circle me-1"></i>Durum</label>
+        <select id="filterStatusSelect" class="gz-select gz-select-sm" onchange="applyFilters()">
+            <option value="">Tüm Durumlar</option>
+            <option value="NotPlayed"  selected="@(filterStatus == "NotPlayed")">Oynanmadı</option>
+            <option value="InProgress" selected="@(filterStatus == "InProgress")">Canlı</option>
+            <option value="HalfTime"   selected="@(filterStatus == "HalfTime")">Devre Arası</option>
+            <option value="Finished"   selected="@(filterStatus == "Finished")">Bitti</option>
+        </select>
+    </div>
+    @if (!string.IsNullOrEmpty(filterTeam) || !string.IsNullOrEmpty(filterStatus))
+    {
+        <a asp-area="Admin" asp-controller="Matches" asp-action="Index"
+           asp-route-seasonId="@currentSeason?.Id" class="gz-btn gz-btn-ghost gz-btn-sm">
+            <i class="fas fa-times me-1"></i> Temizle
+        </a>
+    }
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Hf</th>
+                    <th>Tarih</th>
+                    <th>Ev Sahibi</th>
+                    <th class="text-center">Skor</th>
+                    <th>Deplasman</th>
+                    <th>Durum</th>
+                    <th>Saha</th>
+                    <th class="text-center">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody id="matchTableBody">
+                @foreach (var m in displayList)
+                {
+                    <tr data-home="@m.HomeTeam" data-away="@m.AwayTeam" data-status="@m.Status">
+                        <td><span class="week-badge">@m.WeekNumber</span></td>
+                        <td class="date-cell">
+                            <div>@m.MatchDate.ToString("dd MMM")</div>
+                            <div class="date-time">@m.MatchDate.ToString("HH:mm")</div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (!string.IsNullOrEmpty(m.HomeTeamLogo))
+                                {
+                                    <img src="@m.HomeTeamLogo" alt="@m.HomeTeamShort" class="team-logo-sm" loading="lazy" onerror="this.style.display='none'" />
+                                }
+                                <strong>@m.HomeTeam</strong>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            @if (m.Status != "NotPlayed")
+                            {
+                                <span class="score-pill @(m.Status == "InProgress" ? "score-live" : "")">
+                                    @m.HomeScoreFT - @m.AwayScoreFT
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="vs-pill">VS</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (!string.IsNullOrEmpty(m.AwayTeamLogo))
+                                {
+                                    <img src="@m.AwayTeamLogo" alt="@m.AwayTeamShort" class="team-logo-sm" loading="lazy" onerror="this.style.display='none'" />
+                                }
+                                <strong>@m.AwayTeam</strong>
+                            </div>
+                        </td>
+                        <td>
+                            @{
+                                var (cls, label) = m.Status switch
+                                {
+                                    "InProgress" => ("status-live",     "Canlı"),
+                                    "HalfTime"   => ("status-ht",       "Devre Arası"),
+                                    "Finished"   => ("status-finished", "Bitti"),
+                                    _            => ("status-pending",  "Oynanmadı")
+                                };
+                            }
+                            <span class="status-pill @cls">@label</span>
+                        </td>
+                        <td class="venue-cell">@(m.Venue ?? "—")</td>
+                        <td>
+                            <div class="action-btns">
+                                <a asp-area="Admin" asp-controller="Matches" asp-action="Score"
+                                   asp-route-id="@m.Id" class="action-btn" title="Skor Güncelle">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                <a asp-area="Admin" asp-controller="Matches" asp-action="Events"
+                                   asp-route-id="@m.Id" class="action-btn" title="Olaylar">
+                                    <i class="fas fa-bolt"></i>
+                                </a>
+                                <a asp-area="Admin" asp-controller="Matches" asp-action="Statistics"
+                                   asp-route-id="@m.Id" class="action-btn" title="İstatistikler">
+                                    <i class="fas fa-chart-bar"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!displayList.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center" style="padding:32px;color:#484f58">
+                            <i class="fas fa-search fa-2x mb-2 d-block"></i>
+                            Filtreye uyan maç bulunamadı.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function applyFilters() {
+    const team   = document.getElementById('filterTeamSelect').value;
+    const status = document.getElementById('filterStatusSelect').value;
+    const rows   = document.querySelectorAll('#matchTableBody tr[data-home]');
+    let visible  = 0;
+
+    rows.forEach(row => {
+        const home = row.dataset.home || '';
+        const away = row.dataset.away || '';
+        const st   = row.dataset.status || '';
+        const teamMatch   = !team   || home.includes(team)   || away.includes(team);
+        const statusMatch = !status || st === status;
+        row.style.display = (teamMatch && statusMatch) ? '' : 'none';
+        if (teamMatch && statusMatch) visible++;
+    });
+
+    document.querySelector('.admin-count-badge').textContent = visible + ' / @Model.Count maç';
+}
+</script>
+}

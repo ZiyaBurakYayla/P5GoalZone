@@ -1,0 +1,118 @@
+@using GoalZone.UI.Models.Admin
+@model AdminCreateMatchViewModel
+@{
+    ViewData["Title"] = "Yeni Maç Ekle";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="admin-card" style="max-width:720px">
+    <div class="admin-card-header">
+        <span><i class="fas fa-plus-circle me-2 text-success"></i>Fikstür Oluştur</span>
+    </div>
+    <form asp-area="Admin" asp-controller="Matches" asp-action="Create" method="post" class="admin-form">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="gz-label">Sezon</label>
+                <select name="seasonId" class="gz-select" required>
+                    <option value="">Sezon seçin...</option>
+                    @foreach (var s in Model.Seasons)
+                    {
+                        <option value="@s.Id" selected="@s.IsActive">@s.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="gz-label">Hafta Numarası</label>
+                <input type="number" name="weekNumber" class="gz-input" min="1" max="38" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="gz-label">Ev Sahibi Takım</label>
+                <select name="homeTeamId" id="homeTeamSelect" class="gz-select" required onchange="onHomeTeamChange()">
+                    <option value="">Takım seçin...</option>
+                    @foreach (var t in Model.Teams)
+                    {
+                        <option value="@t.Id" data-stadium="@t.Stadium">
+                            @t.Name (@t.ShortCode)
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="gz-label">Deplasman Takım</label>
+                <select name="awayTeamId" class="gz-select" required>
+                    <option value="">Takım seçin...</option>
+                    @foreach (var t in Model.Teams)
+                    {
+                        <option value="@t.Id">@t.Name (@t.ShortCode)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="gz-label">Maç Tarihi ve Saati</label>
+                <input type="datetime-local" name="matchDate" class="gz-input" required />
+            </div>
+            <div class="col-md-6">
+                <label class="gz-label">Hakem</label>
+                <select name="refereeId" class="gz-select">
+                    <option value="">Hakem seçin...</option>
+                    @foreach (var r in Model.Referees)
+                    {
+                        <option value="@r.Id">@r.FullName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label class="gz-label">Stadyum / Saha</label>
+                <select name="venue" id="venueSelect" class="gz-select">
+                    <option value="">Önce ev sahibi takımı seçin...</option>
+                    @foreach (var t in Model.Teams.Where(t => !string.IsNullOrEmpty(t.Stadium)).DistinctBy(t => t.Stadium).OrderBy(t => t.Stadium))
+                    {
+                        <option value="@t.Stadium">@t.Stadium</option>
+                    }
+                </select>
+                <div class="gz-input-hint">Ev sahibi takım seçildiğinde stadyum otomatik seçilir.</div>
+            </div>
+
+            <div class="col-12">
+                <label class="gz-checkbox-wrap">
+                    <input type="checkbox" name="isFeatured" value="true" />
+                    <span class="gz-checkbox-label">
+                        <i class="fas fa-star text-warning me-1"></i> Öne Çıkan Maç (Featured)
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <div class="admin-form-footer">
+            <a asp-area="Admin" asp-controller="Matches" asp-action="Index" class="gz-btn gz-btn-ghost">
+                <i class="fas fa-arrow-left me-2"></i> İptal
+            </a>
+            <button type="submit" class="gz-btn gz-btn-primary">
+                <i class="fas fa-save me-2"></i> Maçı Oluştur
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+function onHomeTeamChange() {
+    const select  = document.getElementById('homeTeamSelect');
+    const stadium = select.options[select.selectedIndex]?.dataset.stadium;
+    const venue   = document.getElementById('venueSelect');
+
+    if (stadium) {
+        for (let i = 0; i < venue.options.length; i++) {
+            if (venue.options[i].value === stadium) {
+                venue.selectedIndex = i;
+                return;
+            }
+        }
+    }
+    venue.selectedIndex = 0;
+}
+</script>
+}

@@ -1,0 +1,116 @@
+﻿@using GoalZone.UI.Models.Components
+@model List<TeamViewModel>
+@{
+    ViewData["Title"] = "Takım Yönetimi";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var activeTeams = Model.Where(t => t.IsActive).OrderBy(t => t.Name).ToList();
+    var passiveTeams = Model.Where(t => !t.IsActive).OrderBy(t => t.Name).ToList();
+}
+
+<div class="admin-card mb-4">
+    <div class="admin-card-header">
+        <span>
+            <i class="fas fa-shield-alt me-2 text-success"></i>
+            Ligdeki Takımlar
+        </span>
+        <span class="admin-count-badge">@activeTeams.Count takım</span>
+    </div>
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Takım</th>
+                <th>Stadyum</th>
+                <th>Şehir</th>
+                <th class="text-center">Durum</th>
+                <th class="text-center">İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in activeTeams)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            @if (!string.IsNullOrEmpty(t.LogoUrl))
+                            {
+                                <img src="@t.LogoUrl" class="team-logo-sm" loading="lazy" onerror="this.style.display='none'" />
+                            }
+                            <strong>@t.Name</strong>
+                            <span class="week-badge">@t.ShortCode</span>
+                        </div>
+                    </td>
+                    <td style="font-size:.82rem;color:#7d8590">@(t.Stadium ?? "—")</td>
+                    <td style="font-size:.82rem;color:#7d8590">@(t.CityName ?? "—")</td>
+                    <td class="text-center">
+                        <span class="status-pill status-finished">Ligde</span>
+                    </td>
+                    <td class="text-center">
+                        <form asp-area="Admin" asp-controller="Teams" asp-action="Toggle" method="post" class="d-inline">
+                            <input type="hidden" name="teamId" value="@t.Id" />
+                            <button type="submit" class="gz-btn gz-btn-sm"
+                                    style="background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.2);color:#ff4444"
+                                    onclick="return confirm('@t.Name takımını ligden çıkarmak istediğinize emin misiniz?')">
+                                <i class="fas fa-arrow-down me-1"></i> Küme Düş
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (passiveTeams.Any())
+{
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <span>
+                <i class="fas fa-arrow-up me-2 text-info"></i>
+                Ligde Olmayan Takımlar
+            </span>
+            <span class="admin-count-badge">@passiveTeams.Count takım</span>
+        </div>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Takım</th>
+                    <th>Stadyum</th>
+                    <th>Şehir</th>
+                    <th class="text-center">Durum</th>
+                    <th class="text-center">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in passiveTeams)
+                {
+                    <tr style="opacity:.65">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (!string.IsNullOrEmpty(t.LogoUrl))
+                                {
+                                    <img src="@t.LogoUrl" class="team-logo-sm" loading="lazy"
+                                         style="filter:grayscale(1)" onerror="this.style.display='none'" />
+                                }
+                                <strong>@t.Name</strong>
+                                <span class="week-badge">@t.ShortCode</span>
+                            </div>
+                        </td>
+                        <td style="font-size:.82rem;color:#7d8590">@(t.Stadium ?? "—")</td>
+                        <td style="font-size:.82rem;color:#7d8590">@(t.CityName ?? "—")</td>
+                        <td class="text-center">
+                            <span class="status-pill status-pending">Ligde Değil</span>
+                        </td>
+                        <td class="text-center">
+                            <form asp-area="Admin" asp-controller="Teams" asp-action="Toggle" method="post" class="d-inline">
+                                <input type="hidden" name="teamId" value="@t.Id" />
+                                <button type="submit" class="gz-btn gz-btn-sm gz-btn-primary">
+                                    <i class="fas fa-arrow-up me-1"></i> Yükselt
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

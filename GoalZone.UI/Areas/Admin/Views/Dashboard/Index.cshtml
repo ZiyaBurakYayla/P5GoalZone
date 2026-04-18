@@ -1,0 +1,141 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="admin-dashboard">
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background:rgba(0,200,100,.15);color:#00c864">
+                    <i class="fas fa-futbol"></i>
+                </div>
+                <div class="dash-stat-body">
+                    <div class="dash-stat-label">Toplam Maç</div>
+                    <div class="dash-stat-val" id="statTotalMatches">—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background:rgba(255,59,59,.15);color:#ff3b3b">
+                    <i class="fas fa-circle"></i>
+                </div>
+                <div class="dash-stat-body">
+                    <div class="dash-stat-label">Canlı Maç</div>
+                    <div class="dash-stat-val" id="statLive">—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background:rgba(0,180,255,.15);color:#00b4ff">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="dash-stat-body">
+                    <div class="dash-stat-label">Biten Maç</div>
+                    <div class="dash-stat-val" id="statFinished">—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background:rgba(255,200,0,.15);color:#ffc800">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="dash-stat-body">
+                    <div class="dash-stat-label">Oynanmamış</div>
+                    <div class="dash-stat-val" id="statPending">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span>Son Maçlar</span>
+                    <a asp-area="Admin" asp-controller="Matches" asp-action="Index" class="admin-card-action">
+                        Tümünü Gör <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div id="recentMatchesTable">
+                    <div class="admin-loading">
+                        <i class="fas fa-spinner fa-spin me-2"></i> Yükleniyor...
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span>Hızlı İşlemler</span>
+                </div>
+                <div class="quick-actions">
+                    <a asp-area="Admin" asp-controller="Matches" asp-action="Create" class="quick-action-btn">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Yeni Maç Ekle</span>
+                    </a>
+                    <a asp-area="Admin" asp-controller="Matches" asp-action="Index" class="quick-action-btn">
+                        <i class="fas fa-edit"></i>
+                        <span>Skor Güncelle</span>
+                    </a>
+                    <a asp-area="Admin" asp-controller="Seasons" asp-action="Index" class="quick-action-btn">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Sezon Yönetimi</span>
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" asp-area="" class="quick-action-btn" target="_blank">
+                        <i class="fas fa-globe"></i>
+                        <span>Siteyi Görüntüle</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (async function() {
+            try {
+                const res = await fetch('/Admin/Dashboard/Stats');
+                if (!res.ok) throw new Error('Stats endpoint failed');
+                const data = await res.json();
+
+                document.getElementById('statTotalMatches').textContent = data.total;
+                document.getElementById('statLive').textContent = data.live;
+                document.getElementById('statFinished').textContent = data.finished;
+                document.getElementById('statPending').textContent = data.pending;
+
+                if (!data.recent || !data.recent.length) {
+                    document.getElementById('recentMatchesTable').innerHTML =
+                        '<div class="admin-empty">Henüz biten maç yok.</div>';
+                    return;
+                }
+
+                let html = '<table class="admin-table"><thead><tr><th>Ev Sahibi</th><th>Skor</th><th>Deplasman</th><th>Durum</th><th></th></tr></thead><tbody>';
+                data.recent.forEach(m => {
+                    const hLogo = m.homeTeamLogo ? `<img src="${m.homeTeamLogo}" style="width:18px;height:18px;object-fit:contain;margin-right:6px;vertical-align:middle" onerror="this.style.display='none'" />` : '';
+                    const aLogo = m.awayTeamLogo ? `<img src="${m.awayTeamLogo}" style="width:18px;height:18px;object-fit:contain;margin-right:6px;vertical-align:middle" onerror="this.style.display='none'" />` : '';
+                    html += `<tr>
+                        <td><div style="display:flex;align-items:center;gap:6px">${hLogo}<strong>${m.homeTeam}</strong></div></td>
+                        <td class="text-center"><span class="score-pill">${m.homeScoreFT ?? '-'} - ${m.awayScoreFT ?? '-'}</span></td>
+                        <td><div style="display:flex;align-items:center;gap:6px">${aLogo}<strong>${m.awayTeam}</strong></div></td>
+                        <td><span class="status-pill status-finished">Bitti</span></td>
+                        <td><a href="/Admin/Matches/Events/${m.id}" class="admin-link">Düzenle</a></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('recentMatchesTable').innerHTML = html;
+            } catch(e) {
+                document.getElementById('statTotalMatches').textContent = '—';
+                document.getElementById('statLive').textContent = '—';
+                document.getElementById('statFinished').textContent = '—';
+                document.getElementById('statPending').textContent = '—';
+                document.getElementById('recentMatchesTable').innerHTML =
+                    '<div class="admin-empty" style="color:#ff6b6b"><i class="fas fa-exclamation-triangle me-2"></i>Veriler yüklenemedi. API bağlantısını kontrol edin.</div>';
+            }
+        })();
+    </script>
+}

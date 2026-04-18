@@ -1,0 +1,187 @@
+@using GoalZone.UI.Models.Components
+@model MatchDetailViewModel
+@{
+    ViewData["Title"] = "Maç Olayları";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="match-admin-header mb-4">
+    <div class="match-admin-teams">
+        @if (!string.IsNullOrEmpty(Model.HomeTeamLogo))
+        {
+            <img src="@Model.HomeTeamLogo" alt="@Model.HomeTeam" class="team-logo-md" loading="lazy" onerror="this.style.display='none'" />
+        }
+        <span class="match-admin-team">@Model.HomeTeam</span>
+        @if (Model.HomeScoreFT.HasValue)
+        {
+            <span class="match-admin-score">@Model.HomeScoreFT — @Model.AwayScoreFT</span>
+        }
+        else
+        {
+            <span class="match-admin-vs">vs</span>
+        }
+        <span class="match-admin-team">@Model.AwayTeam</span>
+        @if (!string.IsNullOrEmpty(Model.AwayTeamLogo))
+        {
+            <img src="@Model.AwayTeamLogo" alt="@Model.AwayTeam" class="team-logo-md" loading="lazy" onerror="this.style.display='none'" />
+        }
+    </div>
+    <div class="match-admin-actions">
+        <a asp-area="Admin" asp-controller="Matches" asp-action="Score"
+           asp-route-id="@Model.Id" class="gz-btn gz-btn-sm gz-btn-ghost">
+            <i class="fas fa-pen me-1"></i> Skor Düzenle
+        </a>
+        <a asp-area="Admin" asp-controller="Matches" asp-action="Statistics"
+           asp-route-id="@Model.Id" class="gz-btn gz-btn-sm gz-btn-ghost">
+            <i class="fas fa-chart-bar me-1"></i> İstatistikler
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span><i class="fas fa-plus me-2 text-success"></i>Yeni Olay Ekle</span>
+            </div>
+            <form asp-area="Admin" asp-controller="Matches" asp-action="AddEvent"
+                  asp-route-id="@Model.Id" method="post" class="admin-form">
+                <div class="gz-form-group">
+                    <label class="gz-label">Takım</label>
+                    <div class="team-toggle-wrap">
+                        <label class="team-toggle-option">
+                            <input type="radio" name="isHomeTeam" value="true" checked />
+                            <span>@Model.HomeTeam</span>
+                        </label>
+                        <label class="team-toggle-option">
+                            <input type="radio" name="isHomeTeam" value="false" />
+                            <span>@Model.AwayTeam</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="gz-form-group">
+                    <label class="gz-label">Olay Tipi</label>
+                    <select name="eventType" class="gz-select" required>
+                        <option value="Goal">&#9917; Gol</option>
+                        <option value="YellowCard">&#11036; Sarı Kart</option>
+                        <option value="RedCard">&#11036; Kırmızı Kart</option>
+                        <option value="YellowRedCard">&#11036; İkinci Sarı / Kırmızı</option>
+                        <option value="Substitution">&#8645; Oyuncu Değişikliği</option>
+                    </select>
+                </div>
+                <div class="gz-form-group">
+                    <label class="gz-label">Dakika</label>
+                    <input type="number" name="minute" class="gz-input" min="1" max="120" placeholder="45" required />
+                </div>
+                <div class="gz-form-group">
+                    <label class="gz-label">Oyuncu Adı</label>
+                    <input type="text" name="playerName" class="gz-input" placeholder="Bukayo Saka" />
+                </div>
+                <div class="gz-form-group" id="subPlayerWrap" style="display:none">
+                    <label class="gz-label">Çıkan Oyuncu (Değişiklik)</label>
+                    <input type="text" name="substitutedPlayerName" class="gz-input" placeholder="Martinelli" />
+                </div>
+                <div class="gz-form-group">
+                    <label class="gz-label">Açıklama</label>
+                    <input type="text" name="description" class="gz-input" placeholder="Kafa golü, Faul vb." />
+                </div>
+                <button type="submit" class="gz-btn gz-btn-primary w-100">
+                    <i class="fas fa-plus me-2"></i> Olayı Ekle
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span><i class="fas fa-list me-2"></i>Mevcut Olaylar</span>
+                <span class="admin-count-badge">@Model.Events.Count olay</span>
+            </div>
+            @if (!Model.Events.Any())
+            {
+                <div class="admin-empty">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                    Henüz olay eklenmemiş.
+                </div>
+            }
+            else
+            {
+                <div class="events-admin-list">
+                    @foreach (var ev in Model.Events.OrderBy(e => e.Minute))
+                    {
+                        <div class="event-admin-row">
+                            <div class="event-admin-minute">@ev.Minute'</div>
+                            <div class="event-admin-icon">
+                                @switch (ev.EventType)
+                                {
+                                    case "Goal":
+                                        <span class="ev-icon-badge ev-goal-badge" title="Gol">
+                                            <i class="fas fa-futbol"></i>
+                                        </span>
+                                        break;
+                                    case "YellowCard":
+                                        <span class="ev-icon-badge ev-yellow-badge" title="Sarı Kart"></span>
+                                        break;
+                                    case "RedCard":
+                                        <span class="ev-icon-badge ev-red-badge" title="Kırmızı Kart"></span>
+                                        break;
+                                    case "YellowRedCard":
+                                        <span class="ev-icon-badge ev-yr-badge" title="2. Sarı / Kırmızı">
+                                            <span class="ev-y"></span><span class="ev-r"></span>
+                                        </span>
+                                        break;
+                                    case "Substitution":
+                                        <span class="ev-icon-badge ev-sub-badge" title="Değişiklik">
+                                            <i class="fas fa-arrow-up ev-in"></i>
+                                            <i class="fas fa-arrow-down ev-out"></i>
+                                        </span>
+                                        break;
+                                    default:
+                                        <span class="ev-icon-badge ev-goal-badge">
+                                            <i class="fas fa-circle"></i>
+                                        </span>
+                                        break;
+                                }
+                            </div>
+                            <div class="event-admin-info">
+                                <div class="event-admin-team @(ev.IsHomeTeam ? "text-home" : "text-away")">
+                                    @(ev.IsHomeTeam? Model.HomeTeam: Model.AwayTeam)
+                                </div>
+                                <div class="event-admin-player">
+                                    @ev.PlayerName
+                                    @if (!string.IsNullOrEmpty(ev.SubstitutedPlayerName))
+                                    {
+                                        <span class="text-muted"> ↓ @ev.SubstitutedPlayerName</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(ev.Description))
+                                {
+                                    <div class="event-admin-desc">@ev.Description</div>
+                                }
+                            </div>
+                            <form asp-area="Admin" asp-controller="Matches" asp-action="DeleteEvent"
+                                  method="post" class="ms-auto">
+                                <input type="hidden" name="eventId" value="@ev.Id" />
+                                <input type="hidden" name="matchId" value="@Model.Id" />
+                                <button type="submit" class="delete-btn"
+                                        onclick="return confirm('Bu olayı silmek istediğinize emin misiniz?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelector('select[name="eventType"]').addEventListener('change', function() {
+            document.getElementById('subPlayerWrap').style.display =
+                this.value === 'Substitution' ? 'block' : 'none';
+        });
+    </script>
+}

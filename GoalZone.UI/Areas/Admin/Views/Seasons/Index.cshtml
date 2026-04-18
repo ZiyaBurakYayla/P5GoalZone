@@ -1,0 +1,136 @@
+﻿@using GoalZone.UI.Models.Components
+@model List<SeasonViewModel>
+@{
+    ViewData["Title"] = "Sezon Yönetimi";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert-gz alert-success mb-4">
+        <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert-gz alert-danger mb-4">
+        <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span><i class="fas fa-calendar-alt me-2"></i>Mevcut Sezonlar</span>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Sezon</th>
+                        <th>Başlangıç</th>
+                        <th>Bitiş</th>
+                        <th>Durum</th>
+                        <th class="text-center">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr class="@(s.IsActive ? "row-active-season" : "")">
+                            <td>
+                                <strong>@s.Name</strong>
+                                @if (s.IsActive)
+                                {
+                                    <span class="ms-2 status-pill status-live" style="font-size:.6rem">AKTİF</span>
+                                }
+                            </td>
+                            <td>@s.StartYear</td>
+                            <td>@s.EndYear</td>
+                            <td>
+                                @if (s.IsActive)
+                                {
+                                    <span class="status-pill status-live">Aktif Sezon</span>
+                                }
+                                else
+                                {
+                                    <span class="status-pill status-pending">Pasif</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (!s.IsActive)
+                                {
+                                    <form asp-area="Admin" asp-controller="Seasons"
+                                          asp-action="Activate" method="post" class="d-inline">
+                                        <input type="hidden" name="seasonId" value="@s.Id" />
+                                        <button type="submit" class="gz-btn gz-btn-primary gz-btn-sm"
+                                                onclick="return confirm('@s.Name sezonunu aktif yapmak istiyor musunuz?')">
+                                            <i class="fas fa-check me-1"></i> Aktif Yap
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="action-btn" style="cursor:default;opacity:.4" title="Zaten aktif">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span><i class="fas fa-plus-circle me-2 text-success"></i>Yeni Sezon Ekle</span>
+            </div>
+            <form asp-area="Admin" asp-controller="Seasons" asp-action="Create" method="post" class="admin-form">
+                <div class="gz-form-group">
+                    <label class="gz-label">Sezon Adı</label>
+                    <input type="text" name="name" class="gz-input" placeholder="2025/2026" required />
+                    <div class="gz-input-hint">Örn: 2025/2026</div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="gz-label">Başlangıç Yılı</label>
+                        <input type="number" name="startYear" class="gz-input" placeholder="2025" min="2000" max="2100" required />
+                    </div>
+                    <div class="col-6">
+                        <label class="gz-label">Bitiş Yılı</label>
+                        <input type="number" name="endYear" class="gz-input" placeholder="2026" min="2000" max="2100" required />
+                    </div>
+                </div>
+                <div class="gz-form-group mt-3">
+                    <label class="gz-checkbox-wrap">
+                        <input type="checkbox" name="setActive" value="true" />
+                        <span class="gz-checkbox-label">Oluşturulunca aktif sezon yap</span>
+                    </label>
+                </div>
+                <div class="admin-form-footer" style="padding-top:16px;margin-top:0">
+                    <button type="submit" class="gz-btn gz-btn-primary w-100">
+                        <i class="fas fa-save me-2"></i> Sezonu Oluştur
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="admin-card mt-4">
+            <div class="admin-card-header">
+                <span><i class="fas fa-info-circle me-2 text-info"></i>Sezon Geçiş Hakkında</span>
+            </div>
+            <div class="p-4" style="font-size:.85rem;color:#7d8590;line-height:1.8">
+                <p>Bir sezonu <strong style="color:#e6edf3">Aktif Yap</strong> butonuyla seçtiğinizde:</p>
+                <ul style="padding-left:1.2rem;margin-top:8px">
+                    <li>Diğer tüm sezonlar otomatik <strong>pasif</strong> yapılır.</li>
+                    <li>Site ana sayfası ve fikstür yeni sezonu gösterir.</li>
+                    <li>Puan durumu yeni sezonun maçlarından hesaplanır.</li>
+                    <li>Eski sezon verisi <strong>silinmez</strong> — sezon seçici ile görüntülenebilir.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

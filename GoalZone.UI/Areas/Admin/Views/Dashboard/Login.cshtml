@@ -1,0 +1,60 @@
+@{
+    ViewData["Title"] = "Admin Giriş";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GoalZone Admin — Giriş</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="~/css/goalzone.css" rel="stylesheet" />
+    <link href="~/css/admin.css" rel="stylesheet" />
+</head>
+<body class="admin-login-body">
+    <div class="admin-login-wrapper">
+        <div class="admin-login-card">
+            <div class="admin-login-brand">
+                <div class="gz-brand-icon large">⚽</div>
+                <h1>Goal<strong>Zone</strong></h1>
+                <p>Admin Panel</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ViewBag.Error))
+            {
+                <div class="alert alert-danger alert-sm">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@ViewBag.Error
+                </div>
+            }
+
+            <form asp-area="Admin" asp-controller="Dashboard" asp-action="Login" method="post">
+                <div class="gz-form-group">
+                    <label class="gz-label">Kullanıcı Adı</label>
+                    <div class="gz-input-wrap">
+                        <i class="fas fa-user gz-input-icon"></i>
+                        <input type="text" name="username" class="gz-input" placeholder="admin" required />
+                    </div>
+                </div>
+                <div class="gz-form-group">
+                    <label class="gz-label">Şifre</label>
+                    <div class="gz-input-wrap">
+                        <i class="fas fa-lock gz-input-icon"></i>
+                        <input type="password" name="password" class="gz-input" placeholder="••••••••" required />
+                    </div>
+                </div>
+                <button type="submit" class="gz-btn gz-btn-primary w-100 mt-3">
+                    <i class="fas fa-sign-in-alt me-2"></i> Giriş Yap
+                </button>
+            </form>
+
+            <div class="admin-login-footer">
+                <a asp-controller="Home" asp-action="Index" asp-area="">
+                    <i class="fas fa-arrow-left me-1"></i> Siteye Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

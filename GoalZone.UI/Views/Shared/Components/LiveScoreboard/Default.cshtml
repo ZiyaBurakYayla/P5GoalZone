@@ -1,0 +1,34 @@
+@using GoalZone.UI.Models.Components
+@model List<MatchListViewModel>
+@if (Model.Any())
+{
+    <div class="gz-card mb-4">
+        <div class="gz-card-header">
+            <span class="live-dot"></span> CANLI MAÇLAR
+            <span class="badge bg-danger ms-2">@Model.Count</span>
+        </div>
+        <div class="live-matches-list">
+            @foreach (var m in Model)
+            {
+                <a asp-controller="Matches" asp-action="Detail" asp-route-id="@m.Id" class="live-match-row">
+                    <div class="live-minute">
+                        <span class="minute-badge">@m.CurrentMinute'</span>
+                        <span class="live-tag">CANLI</span>
+                    </div>
+                    <div class="live-teams">
+                        <div class="live-team">
+                            <span class="short-code">@m.HomeTeamShort</span>
+                            <span class="full-name">@m.HomeTeam</span>
+                        </div>
+                        <div class="live-score">@m.HomeScoreFT - @m.AwayScoreFT</div>
+                        <div class="live-team text-end">
+                            <span class="full-name">@m.AwayTeam</span>
+                            <span class="short-code">@m.AwayTeamShort</span>
+                        </div>
+                    </div>
+                    <div class="live-arrow"><i class="fas fa-chevron-right"></i></div>
+                </a>
+            }
+        </div>
+    </div>
+}

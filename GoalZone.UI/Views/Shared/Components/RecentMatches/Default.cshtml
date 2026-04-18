@@ -1,0 +1,39 @@
+@using GoalZone.UI.Models.Components
+@model List<MatchListViewModel>
+<div class="gz-card">
+    <div class="gz-card-header">
+        <i class="fas fa-check-circle text-success me-2"></i> TAMAMLANAN MAÇLAR
+    </div>
+    <div class="recent-matches-list">
+        @foreach (var m in Model)
+        {
+            <a asp-controller="Matches" asp-action="Detail" asp-route-id="@m.Id" class="recent-match-row">
+                <div class="recent-time">@m.MatchDate.ToString("HH:mm")</div>
+                <div class="recent-teams">
+                    <div class="recent-team d-flex align-items-center gap-1">
+                        @if (!string.IsNullOrEmpty(m.HomeTeamLogo))
+                        {
+                            <img src="@m.HomeTeamLogo" alt="@m.HomeTeamShort" class="team-logo-sm" loading="lazy" onerror="this.style.display='none'" />
+                        }
+                        <span class="full-name d-none d-md-inline">@m.HomeTeam</span>
+                        <span class="short-code d-md-none">@m.HomeTeamShort</span>
+                    </div>
+                    <div class="recent-score">
+                        <span>@m.HomeScoreFT</span>
+                        <span class="score-dash">-</span>
+                        <span>@m.AwayScoreFT</span>
+                    </div>
+                    <div class="recent-team text-end d-flex align-items-center justify-content-end gap-1">
+                        <span class="full-name d-none d-md-inline">@m.AwayTeam</span>
+                        <span class="short-code d-md-none">@m.AwayTeamShort</span>
+                        @if (!string.IsNullOrEmpty(m.AwayTeamLogo))
+                        {
+                            <img src="@m.AwayTeamLogo" alt="@m.AwayTeamShort" class="team-logo-sm" loading="lazy" onerror="this.style.display='none'" />
+                        }
+                    </div>
+                </div>
+                <span class="recent-ms">MS</span>
+            </a>
+        }
+    </div>
+</div>

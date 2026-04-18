@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36915.13 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoalZone.API", "GoalZone.API\GoalZone.API.csproj", "{38B89982-098F-45E3-88D7-24BCCA6C4320}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoalZone.UI", "GoalZone.UI\GoalZone.UI.csproj", "{6DA2341B-A2A8-46E7-895F-DEFE6EF2710E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{38B89982-098F-45E3-88D7-24BCCA6C4320}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38B89982-098F-45E3-88D7-24BCCA6C4320}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38B89982-098F-45E3-88D7-24BCCA6C4320}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38B89982-098F-45E3-88D7-24BCCA6C4320}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DA2341B-A2A8-46E7-895F-DEFE6EF2710E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DA2341B-A2A8-46E7-895F-DEFE6EF2710E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DA2341B-A2A8-46E7-895F-DEFE6EF2710E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DA2341B-A2A8-46E7-895F-DEFE6EF2710E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BE724C39-544F-4344-95C9-F00D23BF4820}
+	EndGlobalSection
+EndGlobal
