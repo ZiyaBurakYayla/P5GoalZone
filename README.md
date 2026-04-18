@@ -1,42 +1,39 @@
-⚽ GoalZone
+GoalZone: Football Data Management System & API
 
-GoalZone, futbol tutkunları ve lig yöneticileri için geliştirilmiş; skor takibi, detaylı maç istatistikleri ve puan durumu sunan modern bir web uygulamasıdır.
+GoalZone, futbol veri setlerini işlemek, istatistiksel analizler üretmek ve lig operasyonlarını yönetmek üzere tasarlanmış, veri odaklı bir arka uç mimarisine sahip bir platformdur. Proje, ilişkisel veritabanı yönetimi ve servis tabanlı veri iletimi prensipleri üzerine inşa edilmiştir.
 
-Kullanıcı dostu arayüzü sayesinde fikstürleri haftalık olarak inceleyebilir, oynanan maçların dakika dakika olaylarını (goller, kartlar, oyuncu değişiklikleri) profesyonel bir "Timeline" üzerinden takip edebilirsiniz.
+🛠 Teknik Mimari ve Veri Katmanı
+Sistem, verinin ham halden anlamlı bir istatistiksel çıktıya dönüşme sürecini yöneten katmanlı bir yapıya sahiptir:
 
-🚀 Öne Çıkan Özellikler
-🏆 Dinamik Puan Durumu: Maç sonuçlarına göre anında hesaplanan ve güncellenen lig sıralaması.
+Veri Modelleme: MS SQL Server üzerinde normalize edilmiş ilişkisel yapı (Takımlar, Sezonlar, Maçlar, Etkinlikler ve İstatistikler).
 
-📅 Akıllı Fikstür Yönetimi: Haftalara göre kategorize edilmiş, sezonlar arası geçiş yapılabilen detaylı maç programı.
+İş Mantığı (Business Logic): .NET üzerinden LINQ sorguları ile geliştirilen puan durumu hesaplama motoru ve maç sonuçları üzerinden tetiklenen veri güncellemeleri.
 
-⚡ Canlı Maç Olayları (Timeline): Goller, sarı/kırmızı kartlar ve taktiksel oyuncu değişikliklerinin hakem defteri formatında, dakika dakika görselleştirilmesi.
+API Entegrasyonu: Verilerin Web UI veya harici istemcilere servis edilmesini sağlayan yapılandırılmış veri transfer nesneleri (DTOs).
 
-📊 Maç İstatistikleri: Topla oynama yüzdeleri, şut istatistikleri, pas isabet oranları ve köşe vuruşları gibi kritik verilerin karşılaştırmalı analizi.
+ORM Katmanı: Entity Framework Core ile veritabanı etkileşimi ve kısıtlamaların (Unique Constraints, Foreign Keys) yönetimi.
 
-🛠️ Kapsamlı Admin Paneli: Takımların, fikstürün, maç skorlarının ve maç içi olayların kolayca yönetilebildiği, tam yetkili yönetim arayüzü.
+📊 Veri ve API Özellikleri
+Standings Engine: Maç sonuçlarını (galibiyet, beraberlik, mağlubiyet, averaj) analiz ederek anlık puan durumu tablosunu asenkron olarak hesaplar.
 
-💻 Kullanılan Teknolojiler
-Backend
+Match Event Tracking: Maç içerisindeki her aksiyonun (gol, kart, oyuncu değişikliği) zamansal veri (timestamp/minute) bazlı kaydedilmesi ve olay tipine göre sınıflandırılması.
 
-C# & ASP.NET Core MVC: Güçlü, ölçeklenebilir ve güvenli arka uç mimarisi.
+Comparative Statistics: İki takım arasındaki performans verilerinin (şut, pas isabeti, korner vb.) karşılaştırmalı sayısal analizleri.
 
-Entity Framework Core: Veritabanı işlemleri ve Code-First / Database-First yaklaşımıyla ORM yönetimi.
+Admin Data Control: Tüm CRUD (Oluşturma, Okuma, Güncelleme, Silme) işlemlerinin yetkilendirilmiş bir arayüz üzerinden veri bütünlüğünü koruyarak gerçekleştirilmesi.
 
-LINQ: Karmaşık veri filtreleme ve puan durumu hesaplama algoritmaları.
+💻 Teknoloji Yığını
+Backend: C#, ASP.NET Core
 
-Frontend
+Data Access: Entity Framework Core
 
-Razor Views (cshtml): Sunucu taraflı dinamik sayfa oluşturma.
+Database: MS SQL Server
 
-CSS3 & Flexbox/Grid: Tüm cihazlarla uyumlu (Responsive), kayma yapmayan ve modern UI tasarımı.
+Frontend Data Rendering: Razor Pages, CSS Grid & Flexbox
 
-Vanilla JavaScript: Sayfa yenilenmeden sekme geçişleri ve dinamik UI etkileşimleri.
+Patterns: MVC, Repository Pattern, Data Transfer Objects (DTO)
 
-Veritabanı
-
-MS SQL Server: İlişkisel veri modellemesi (Takımlar, Sezonlar, Maçlar, Etkinlikler ve İstatistikler).
-
-📸 Ekran Görüntüleri
+📸 Sistemden Görünümler
 ![1](https://raw.githubusercontent.com/ZiyaBurakYayla/P5GoalZone/refs/heads/Default/GoalZone.UI/Images/Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202026-04-19%20011720.png)
 ![2](https://raw.githubusercontent.com/ZiyaBurakYayla/P5GoalZone/refs/heads/Default/GoalZone.UI/Images/Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202026-04-19%20011930.png)
 ![3](https://raw.githubusercontent.com/ZiyaBurakYayla/P5GoalZone/refs/heads/Default/GoalZone.UI/Images/Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202026-04-19%20011941.png)
